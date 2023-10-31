@@ -23,7 +23,9 @@ Consensus定义:
 
 一个configuration(状态)就是指所有进程的内部状态和message buffer状态. 整个系统总是从一个configuration变化为另外一个configuration. 这个变化过程叫做step, 一个step取决于message buffer返回消息的情况, 因为receive(p)返回的是M还是null, 而transition function是deterministic的, 所以下一个configuration取决于message buffer的返回值. 这个消息被接受处理的过程叫做event(p, m), 消息被延迟的事件叫做event(p, null). 这些steps叫做一个run, 如果结果的configuration有任何一个进程的yp={0,1}那么着叫做一个deciding run, 这个configuration已经有了表决结果. 因为只要有一个进程能够进入decision state，那么整个configuration就算是0-valent或者1-valent了.
 
-![img](./assets/model.png)
+<div align=center>
+<img src="./assets/model.png">
+</div>
 
 一个configuration的一个schedule(事件序列)记作𝞂, 它包含了从这个configuration起, 一系列的事件. 比如(p1, m1), (p2, m2), (p3, m3)….
 
@@ -55,11 +57,15 @@ Consensus定义:
 
 这条引理表示如果一个C里有两组事件, 每个事件(p, m)分别是在两组没有交互的进程上, 那么先使用任何一组事件再使用另外一组事件在C上, 结果都一样. 下图描述了这样的情况.
 
-![img](./assets/lemma1.png)
+<div align=center>
+<img src="./assets/lemma1.png">
+</div>
 
 这个引理太容易理解了, 就不做证明了. 不过我们可以举个例子来描述一下: 比如Paxos的两阶段算法中, 假设有A, B, C, D，E五个节点, 𝞂1是B收到了A的第一阶段消息, 𝞂2是D/E收到了C的第一阶段消息(假设网络有延迟，D/E还没收到A的第一阶段消息，B还没收到C的第一阶段消息). 因为A/B是一组进程, C/D/E是一组进程, 𝞂1和𝞂2分别作用于这两组不相交的进程上.那么无论是先𝞂1, 𝞂2的顺序被送达还是按照𝞂2, 𝞂1的顺序, 最终结果都是C3。前面模型中提到的message buffer可能返回空就很好的模拟了这种消息延迟或者短暂的发生网络分区的情况.
 
-![img](./assets/lemma1_paxos.png)
+<div align=center>
+<img src="./assets/lemma1_paxos.png">
+</div>
 
 ## Lemma 2
 
@@ -73,7 +79,9 @@ Consensus定义:
 
 进一步思考, 并使用前面提出的adjacent的概念，因为同时存在0-valent和1-valent的initial configurations, 假设他们是C和C’, 那么从C到C’一定有一个路径上, 至少存在一处adjacent的C0和C1, 使得C0是0-valent, C1是1-valent. 下图是一个只有三个进程(p0, p1, p2)的所有initial configuration(xp1, xp2, xp3)的情况, 线条连接的是相邻的两个initial configuration. (注意，这里的路径不是指变化路径，他只是表示initial configuration的相似性)
 
-![img](./assets/lemma2_adjacent.png)
+<div align=center>
+<img src="./assets/lemma2_adjacent.png">
+</div>
 
 为什么说“一定存在相邻的C0和C1“呢？看这个图，明显{0,0,0}肯定是0-valent, {1,1,1}肯定是1-valent，那么我们把他们当作C和C’, 显然这是个连通图，所以他们俩是reachable的，那么他们之间的某个路径上一定存在从0-valent变化到1-valent的地方。这个例子中在{0,0,0} - {0,1,0} - {1,1,0} - {1,1,1}这条路径上, {0,1,0}和{1,1,0}很有可能就是C0和C1的分界点(假设{0,1,0}是0-valent，{1,1,0}是1-valent), 也可能在其他路径上，比如如果{0,1,0}是1-valent，那么分界点就在{0,0,0}和{0,1,0}了。无论如何一定存在一对相邻的initial configuration分别是0-valent和1-valent。
 
@@ -87,7 +95,9 @@ C1=A建议1给B/C. B/C自己都倾向于1. (C1={1,1,1}并且它是1-valent)
 
 明显, 如果没有任何故障, C0结果是0, C1结果是1. 因为C0和C1只差一个进程A不同, 假设A进程挂了, 那么C0’和C1’其实是一样的, 这时候他们俩结果应该是一致的, 应该都是1. 但是这和C0就算有一个faulty节点也应该结果为0矛盾, 所以在**一个faulty process存在的情况下**不可能所有的initial configuration都是确定0-valent或者1-valent的，一定存在不确定的initial configuration.
 
-![img](./assets/lemma2_sample.png)
+<div align=center>
+<img src="./assets/lemma2_sample.png">
+</div>
 
 我们通过反证法证明了一个协议P必然包含bivalent initial configuraiton. 本质上这是异步网络中一个没有响应的节点导致的结果不确定性. 其实Lemma 2如果这样讲会更容易理解：
 
@@ -109,7 +119,9 @@ C1=A建议1给B/C. B/C自己都倾向于1. (C1={1,1,1}并且它是1-valent)
 
 简化一点来说就是，对于E0，我们一定能在**D**里找到一个单值格局F0，使得要么能从E0到F0，要么能从F0到E0。下面这个盗来的图形象描绘了这一部分证明：
 
-![img](./assets/v2-d3cb6bd673ea6aa3469c61bc68f7ab94_1440w.webp)
+<div align=center>
+<img src="./assets/v2-d3cb6bd673ea6aa3469c61bc68f7ab94_1440w.webp">
+</div>
 
 现在我们知道**D**里面两种单值格局都有了，因为**D**里的每个格局都是从ℂ里的某个格局经过一步e得到的，那么我们一定能在ℂ里找到相邻的两个格局C0,C1，使得D0=e(C0)是0-单值格局，而D1=e(C1)是1-单值格局。不妨设是C0经过一步e’得到C1。（若则C1经过一步到C0下面的讨论也同样成立）
 
@@ -117,17 +129,15 @@ C1=A建议1给B/C. B/C自己都倾向于1. (C1={1,1,1}并且它是1-valent)
 
 **情况一：若p’不等于p**，也就是说e和e’是作用在不同的节点上的。那么根据交换律，交换e和e’的顺序结果应该不变。我们已经知道了C0通过e’到达C1再通过e到达D1。还知道C0通过e到达D0，此时如果让D0接受事件e’，因为满足交换律我们应该也得到D1。但这是不可能的因为D0已经是单值格局不能变了，所以得出矛盾。见下图：
 
-![img](./assets/v2-59a254116f94f414f881f9bc6005f33f_1440w.webp)
-
-
+<div align=center>
+<img src="./assets/v2-59a254116f94f414f881f9bc6005f33f_1440w.webp">
+</div>
 
 **情况二：若p’等于p**，此时从C0出发必存在一个不涉及节点p的事件序列R，能达到一个单值格局A。（因为我们的算法要在有一个节点挂了的时候仍能正常运行，现在就好比是p点挂了）现在我们让D0接到序列R，设结果为E0，也就是说E0=R(e(C0))。因为R不涉及p，根据交换律，我们让A接收事件e后，也应该得到E0，也就是e(A)=e(R(C0))=R(e(c0))=E0。类似地，我们让D1接受序列得到E1，也就是说E1=R(e(e'(C0)))，同样根据交换律，A接收事件e和e’后也应该得到E1，e(e'(A)) = e(e'(R(C0))=R(e(e'(C0)))=E1。但是，A已经是单值格局了，不可能既能到E0又能到E1，得出矛盾。
 
-![img](./assets/v2-ad560f1e8f8d03371178edfa8bac1d71_1440w.webp)
-
-综合以上所有这些矛盾，说明我们一开始的假设“**D**里不包含双值格局”是不正确的。D里必定包含双值格局。所以我们前面说的这个构造无限序列的方法就成立了：
-
-> *前面引理已经证明了初始格局里一定有双值格局，我们拿一个这样的格局出来，再找一个接下来要发生的事件e，那么我们总可以通过把事件e推后到某个合适的时间发生，使得之后得到的格局仍然可能是双值格局(i.e.未能做出决定的格局）。从这个新双值格局继续同样操作，那么就可以永远留在双值格局，不做出最终决定。这样这个共识算法就不能终止了。*
+<div align=center>
+<img src="./assets/v2-ad560f1e8f8d03371178edfa8bac1d71_1440w.webp">
+</div>
 
 所以原始的命题得证：在异步网络中，只要有一个节点有可能挂，理论上就不存在一定能在有限时间内结束的共识算法。
 
