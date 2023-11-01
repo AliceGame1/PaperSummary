@@ -4,8 +4,7 @@
 
 在一个分布式的系统中，即使有了类似于Zookeeper之类的协调服务之后，如何设计一个分布式系统也是一个很有挑战性的话题。首要的分布式系统中的问题是：如何保证一致性？我们设计的所有一致性的协议基本都是lease based的，而且是两阶段的，所以两阶段和lease based(如:短期的lease 基于version的，长期的lease按照心跳时间的)是分布式一致性设计的最关键的步骤。分布式环境下是绝对不允许lock这种东西存在的，因为可能造成永久的block。
 
-下面我们就来读一下这篇论文，是如何利用lease和2pc实现大规模的webserver服务。
-
+下面我们就来读一下这篇论文，是如何利用lease和2pc实现大规模的webserver服务，并且作者这里根据这篇论文实现了一个DB缓存一致性协议：https://github.com/AliceRAS1/PaperSummary/blob/main/Scaling%20Memcache%20in%20Facebook/cache%20db%20consistent%20protocol.md。
 
 
 **整体架构**
