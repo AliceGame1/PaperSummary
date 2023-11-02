@@ -212,13 +212,13 @@ func InitPages(classToSize []int) []int {
 
 
 
-### 从单线程到多线程 -- mimalloc
+## 从单线程到多线程 -- mimalloc
 
 mimalloc是专门为多线程应用设计的一款高性能的内存分配器，能极大降低多线程环境下线程间同步带来的性能下降。与tcmalloc类似，mimalloc采用了线程本地缓存的设计，同时采用了复杂的缓存管理机制提升内存分配和释放的速度。此外，mimalloc的内存分配/释放算法是lock-free的，意味着它是async-signal-safe（可以在signal handler内调用）。
 
 这篇文章主要介绍mimalloc中的四个关键数据结构：tld（thread local data）、heap、page、segment，以及与之关联的一些算法流程，以使得我们对mimalloc在达到稳态后是如何实现高性能有个大致的了解。
 
-### thread local data
+## thread local data
 
 大多数高性能内存分配器产品都会实现自己的内存池（缓存），以减少系统调用（mmap）的次数。mimalloc将缓存进一步划分到各个线程中，各线程的内存分配都走线程本地缓存（tld），最大程度避免了内存分配时线程间的（锁）竞争。
 
@@ -234,7 +234,7 @@ mimalloc的cache结构
 
 虽然内存一定走线程本地的heap分配，但内存被分配后可能会传递到其它线程并由其负责释放（归还到原线程的tld），因此不可避免地导致多线程竞态的风险。后面我们会看到，mimalloc通过free-list分片的方式极大地分散了内存跨线程释放时的竞态风险。
 
-### heap
+## heap
 
 heap以page为单位进行内存管理，page是一组大小固定的block序列（但不同page的block size可以不同），后者是内存分配所返回的对象。
 
@@ -274,7 +274,7 @@ full page跨线程释放时的延迟free
 
 至于本地线程是如何实现定期从delayed_free中收集并归还block到对应full page，后面我们会看到，mimalloc通过对page内的free list再一次分片实现了这种类似于定期心跳的回收机制。
 
-### page
+## page
 
 page是mimalloc中内存管理的最小单位（block太简单，忽略不计），它由大小固定block序列和元数据组成，这些block由隶属于page的free list组织：当进行内存申请时，最终返回的就是free list中第一个block。
 
@@ -296,7 +296,7 @@ page内部的free list分片
 
 将local-free分片出来的原因则较为间接：一方面是**提供了一种定期检查的机制**，保证一个page在经过固定次数malloc后一定会触发内存回收逻辑，不仅包括从local-free和thread-free中回收block，还包括从上一节中介绍的`heap->delayed_free`中回收block。另一方面，对于使用了引用计数的语言运行时而言，释放大对象（直接或间接引用了大量资源的对象）时会触发大量的引用递减操作，其中一个优化便是使用所谓延迟引用递减（deferred decrement）的机制，mimalloc所提供的定期回收机制使得语言运行时可以将引用递减推迟到内存压力紧张时执行。
 
-### segment
+## segment
 
 heap、page、block内存并非凭空而来，它们最终源于内核为我们分配的匿名内存段——通过mmap系统调用的方式。然而后者的开销是昂贵的，因此mimalloc设置了尺寸较大的segment作为heap和内核之间的缓冲，以减少mmap/munmap的调用次数
 
@@ -318,7 +318,7 @@ segment结构较为简单：一块连续的大内存（32MB），以64KB为单�
 
 由于返回的slice span大小可能大于实际page所需，因此会将多余部分裁剪出来的作为新的span，并添加到对应size class的span queue，以避免浪费
 
-### 总结
+## 总结
 
 mimalloc采用one-cache-per-thread的设计减少了内存分配和释放时线程间的竞争，各线程从本地的heap请求内存即可；heap以page为单位对free list进行了分片，大幅降低了跨线程内存释放时的竞争概率以及提高了连续内存分配的局域性；page在此基础上对free list做了进一步的分片，分隔了本地线程malloc/free和跨线程free流程之间的耦合，同时为上层提供了一种定期触发的回收机制；最后，segment充当了heap和内核之间的缓冲，减少了mmap/munmap等昂贵的系统调用频率。
 
