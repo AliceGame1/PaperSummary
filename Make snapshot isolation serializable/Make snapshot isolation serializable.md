@@ -46,4 +46,9 @@
 
 经过以上检查更新 T.outConflict 和 T.inConflict，如果发现它们都是 true，则立即中止事务（图中抛出 UNSAFE_ERROR）。
 
+- 对于commit，检查T.outConflict 和 T.inConflict是否都是true
+
+![img](./assets/6990176637312.png)
+
+
 以上实现还有个问题：如果有 predicate read （例如 `select * from t where k < 50 and k >= 40`），要对范围加锁才行，不然会存在 phantom 问题。论文的实现是基于 BerkleyDB 的，它的锁粒度是 page，因此不存在这个问题。对于其他数据库可以用 gap lock 来实现，但是其实在现代DBMS中，这通常通过记录 predicate 来实现。
